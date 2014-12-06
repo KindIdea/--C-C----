@@ -1,22 +1,513 @@
-# Auto detect text files and perform LF normalization
-* text=auto
 
-# Custom for Visual Studio
-*.cs     diff=csharp
-*.sln    merge=union
-*.csproj merge=union
-*.vbproj merge=union
-*.fsproj merge=union
-*.dbproj merge=union
+// ******************************************************************************
+// * 版权所有 (C)2010, 九江学院软件工程研究所3G培训班
+// * 
+// * 文件名称： // lklist.c
+// * 文件标识： // 见配置管理计划书
+// * 内容摘要： // 实现单链表的创建、清空、初始化、查找、插入、删除等操作
+// * 其它说明： // 其它内容的说明
+// * 当前版本： // 输入当前版本
+// * 作    者： // 刘华中
+// * 完成日期： // 2011年3月1日
+// * 
+// * 修改记录1：// 修改历史记录，包括修改日期、修改者及修改内容
+// *    修改日期：
+// *    版 本 号：
+// *    修 改 人：
+// *    修改内容： 
+// * 修改记录2：…
+// ******************************************************************************/
 
-# Standard to msysgit
-*.doc	 diff=astextplain
-*.DOC	 diff=astextplain
-*.docx diff=astextplain
-*.DOCX diff=astextplain
-*.dot  diff=astextplain
-*.DOT  diff=astextplain
-*.pdf  diff=astextplain
-*.PDF	 diff=astextplain
-*.rtf	 diff=astextplain
-*.RTF	 diff=astextplain
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include "lklist.h"
+
+/*****************************************************************************
+ *                            常量                                           *
+ *****************************************************************************/
+
+
+/*****************************************************************************
+ *                            宏                                             *
+ *****************************************************************************/
+
+
+
+/*****************************************************************************
+ *                          数据类型                                         *
+ *****************************************************************************/
+
+
+
+/*****************************************************************************
+ *                           全局变量                                        *
+ *****************************************************************************/
+
+
+
+/*****************************************************************************
+ *                           局部函数原型                                    *
+ *****************************************************************************/
+
+
+/*****************************************************************************
+ *                     函数实现--公有部分                                    *
+ *****************************************************************************/
+
+/*****************************************************************************
+* 函数名称： InitList()
+* 功能描述： 初始化单链表
+* 访问的表： 
+* 修改的表： 
+* 输入参数： 指向单链表的指针
+* 输出参数： 无
+* 返 回 值： OK 表示成功，OVERFLOW 表示溢出
+* 其它说明： 
+* 修改日期    版本号     修改人	     修改内容
+* -----------------------------------------------
+* 11/03/01	   V1.0	      XXXX	      XXXX
+******************************************************************************/
+
+WORD InitList(T_LinkList **L)
+{
+	*L = (T_LinkList *) malloc (sizeof(T_LinkList));
+	if (NULL == L)
+	{
+		return(OVERFLOW);
+	}
+
+	(*L)->ptHead = NULL;
+	(*L)->ptCur  = NULL;
+	(*L)->iNum  = 0;
+
+	return(OK);
+}
+
+/*****************************************************************************
+* 函数名称： ClearList()
+* 功能描述： 初始化单链表
+* 访问的表： 
+* 修改的表： 
+* 输入参数： 指向单链表的指针
+* 输出参数： 无
+* 返 回 值： OK 表示成功
+* 其它说明： 
+* 修改日期    版本号     修改人	     修改内容
+* -----------------------------------------------
+* 11/03/01	   V1.0	      XXXX	      XXXX
+******************************************************************************/
+
+WORD ClearList(T_LinkList *L)
+{
+	T_ListNode *ptTemp;
+
+	L->ptCur = L->ptHead;
+	while (NULL != L->ptCur)
+	{
+		ptTemp   = L->ptCur;
+		L->ptCur = L->ptCur->ptNext;
+		free(ptTemp);
+	}
+
+	L->ptHead = NULL;
+	L->iNum   = 0;
+
+	return(OK);
+}
+
+/*****************************************************************************
+* 函数名称： CreateListptHead()
+* 功能描述： 头插法创建单链表
+* 访问的表： 
+* 修改的表： 
+* 输入参数： 指向单链表的指针
+* 输出参数： 无
+* 返 回 值： OK 表示成功，OVERFLOW表示溢出
+* 其它说明： 
+* 修改日期    版本号     修改人	     修改内容
+* -----------------------------------------------
+* 11/03/01	   V1.0	      XXXX	      XXXX
+******************************************************************************/
+
+WORD CreateListHead(T_LinkList *L, int iInSize, void (*InputElem)(Elemtype *))
+{
+	T_ListNode * ptListNodeTemp;
+	Elemtype eDatatmp;
+
+    int i;
+	for (i = 0; i < iInSize; i++)
+	{
+        printf("\n请输入第 %d 个值：",i+1);
+        InputElem(&eDatatmp);
+
+		ptListNodeTemp = (T_ListNode *)malloc(sizeof(T_ListNode)); 
+		if (NULL == ptListNodeTemp)
+		{
+			return(OVERFLOW);
+		}
+		ptListNodeTemp->eData = eDatatmp;
+		ptListNodeTemp->ptNext = L->ptHead;
+
+		L->ptHead = ptListNodeTemp;
+		L->iNum++;
+	}
+
+	return (OK);
+}
+
+/*****************************************************************************
+* 函数名称： CreateListTail()
+* 功能描述： 尾插法建立单链表
+* 访问的表： 
+* 修改的表： 
+* 输入参数： 指向单链表的指针
+* 输出参数： 无
+* 返 回 值： OK 表示成功，OVERFLOW表示溢出
+* 其它说明： 
+* 修改日期    版本号     修改人	     修改内容
+* -----------------------------------------------
+* 11/03/01	   V1.0	      XXXX	      XXXX
+******************************************************************************/
+
+WORD CreateListTail(T_LinkList *L, int iInSize, void (*InputElem)(Elemtype *))
+{
+	T_ListNode * ptListNodeTemp;
+	Elemtype eDataTemp;
+    int i;
+
+    L->ptCur = L->ptHead;
+    for (i = 0; i < iInSize; i++)
+    {
+        printf("\n请输入第 %d 个值：",i+1);
+        InputElem(&eDataTemp);  // 输入Elemtype类型的数据
+
+		ptListNodeTemp = (T_ListNode *) malloc (sizeof(T_ListNode));
+		if(NULL == ptListNodeTemp)
+		{
+			return(OVERFLOW);
+		}
+		ptListNodeTemp->eData  = eDataTemp;
+		ptListNodeTemp->ptNext = NULL;
+
+		if (0 == i)// 第一个结点
+		{
+			L->ptHead = ptListNodeTemp;
+		}
+		else // 其他结点
+		{
+			L->ptCur->ptNext = ptListNodeTemp;
+		}
+
+		L->ptCur = ptListNodeTemp;
+		L->iNum++;
+	}
+	
+	return(OK);
+}
+
+/*****************************************************************************
+* 函数名称： DisplayList()
+* 功能描述： 遍历单链表
+* 访问的表： 
+* 修改的表： 
+* 输入参数： 指向单链表的指针
+* 输出参数： 无
+* 返 回 值： OK 表示成功，ERROR表示链表为空
+* 其它说明： 
+* 修改日期    版本号     修改人	     修改内容
+* -----------------------------------------------
+* 11/03/01	   V1.0	      XXXX	      XXXX
+******************************************************************************/
+
+WORD DisplayList(T_LinkList *L, void (*Visit)(Elemtype *))
+{
+	int iCount = 0;
+	if(0 == L->iNum)
+	{
+		return(ERROR);
+	}
+
+	L->ptCur = L->ptHead;
+	while(NULL != L->ptCur)
+	{
+		iCount ++;
+		printf("\n\n第 %d 个值为：",iCount);
+		Visit(&L->ptCur->eData);
+		L->ptCur = L->ptCur->ptNext;
+	}
+	return(OK);
+}
+
+/*****************************************************************************
+* 函数名称： LengthList()
+* 功能描述： 求单链表长度
+* 访问的表： 
+* 修改的表： 
+* 输入参数： 指向单链表的指针
+* 输出参数： 无
+* 返 回 值： 返回链表的长度
+* 其它说明： 
+* 修改日期    版本号     修改人	     修改内容
+* -----------------------------------------------
+* 11/03/01	   V1.0	      XXXX	      XXXX
+******************************************************************************/
+
+WORD LengthList(T_LinkList *L)
+{
+	int iLength;
+	iLength = L->iNum;
+	return (iLength);
+}
+
+/*****************************************************************************
+* 函数名称： EmptyList()
+* 功能描述： 判空单链表
+* 访问的表： 
+* 修改的表： 
+* 输入参数： 指向单链表的指针
+* 输出参数： 无
+* 返 回 值： OK 表示链表为空，ERROR表示链表不空
+* 其它说明： 
+* 修改日期    版本号     修改人	     修改内容
+* -----------------------------------------------
+* 11/03/01	   V1.0	      XXXX	      XXXX
+******************************************************************************/
+
+WORD EmptyList(T_LinkList *L)
+{
+	if(0 == L->iNum)
+	{
+		return (OK);
+	}
+	else
+	{
+		return (ERROR);
+	}
+}
+
+/*****************************************************************************
+* 函数名称： FindListOrder()
+* 功能描述： 按序号查找单链表
+* 访问的表： 
+* 修改的表： 
+* 输入参数： 指向单链表的指针
+* 输出参数： 无
+* 返 回 值： OK 表示成功，ERROR表示查找位置不合法
+* 其它说明： 
+* 修改日期    版本号     修改人	     修改内容
+* -----------------------------------------------
+* 11/03/01	   V1.0	      XXXX	      XXXX
+******************************************************************************/
+
+WORD FindListOrder(T_LinkList *L, const int iInPosition, Elemtype *peOutValue)
+{
+    int i;
+
+    if (iInPosition <1 || iInPosition >L->iNum)
+    {
+        return(ERROR);
+    }
+
+    L->ptCur = L->ptHead;
+    for (i = iInPosition-1; i > 0; i--)
+    {
+        L->ptCur = L->ptCur->ptNext;
+    }
+    *peOutValue = L->ptCur->eData;
+
+    return(OK);
+}
+
+/*****************************************************************************
+* 函数名称： FindListValue()
+* 功能描述： 按序号查找单链表
+* 访问的表： 
+* 修改的表： 
+* 输入参数： 指向单链表的指针
+* 输出参数： 无
+* 返 回 值： OK 表示成功，ERROR表示没找到
+* 其它说明： 
+* 修改日期    版本号     修改人	     修改内容
+* -----------------------------------------------
+* 11/03/01	   V1.0	      XXXX	      XXXX
+// ******************************************************************************/
+
+WORD FindListValue(T_LinkList *L, Elemtype *peInValue, int *piOutPosition,T_ListNode **peOutValuePoint, WORD (*EqualElem)(Elemtype *, Elemtype *))
+{
+    int iCount = 1;
+
+    L->ptCur = L->ptHead;
+    while (NULL != L->ptCur)
+    {
+		int flag;
+		flag = EqualElem(peInValue,&L->ptCur->eData);
+        if ( flag )
+        {
+            *piOutPosition      = iCount;
+            *peOutValuePoint    = L->ptCur;
+            return(OK);
+        }
+
+		iCount ++;
+		L->ptCur = L->ptCur->ptNext;
+    }
+
+    return(ERROR);
+}
+
+/*****************************************************************************
+* 函数名称： UpdateList()
+* 功能描述： 更新单链表
+* 访问的表： 
+* 修改的表： 
+* 输入参数： 指向单链表的指针
+* 输出参数： 无
+* 返 回 值： OK 表示更新成功，ERROR表示位置不合法
+* 其它说明： 
+* 修改日期    版本号     修改人	     修改内容
+* -----------------------------------------------
+* 11/03/01	   V1.0	      XXXX	      XXXX
+// ******************************************************************************/
+
+WORD UpdateList(T_LinkList *L, int iInPosition, Elemtype *peInValue)
+{
+    int iCount = 0;
+
+    if (iInPosition < 1 || iInPosition > L->iNum)
+    {
+        return(ERROR);
+    }
+
+    L->ptCur = L->ptHead;
+    while (NULL != L->ptCur)
+    {
+        iCount ++;
+        if (iCount == iInPosition)
+        {
+            L->ptCur->eData = *peInValue;
+            return(OK);
+        }
+        L->ptCur = L->ptCur->ptNext;
+    }
+
+    return(OK);
+}
+
+/*****************************************************************************
+* 函数名称： InsertList()
+* 功能描述： 插入元素到单链表指定位置之后
+* 访问的表： 
+* 修改的表： 
+* 输入参数： 指向单链表的指针
+* 输出参数： 无
+* 返 回 值： OK 表示更新成功，ERROR表示位置不合法，OVERFLOW表示空间溢出
+* 其它说明： 
+* 修改日期    版本号     修改人	     修改内容
+* -----------------------------------------------
+* 11/03/01	   V1.0	      XXXX	      XXXX
+// ******************************************************************************/
+
+WORD InsertList(T_LinkList *L, int iInPosition, Elemtype *peInValue)
+{
+    T_ListNode * ptListNodeTmp;
+    int iCount = 0;
+
+    if (iInPosition < 0 || iInPosition > L->iNum)
+    {
+        return(ERROR);
+    }
+
+    ptListNodeTmp = (T_ListNode *) malloc (sizeof(T_ListNode));
+    if (NULL == ptListNodeTmp)
+    {
+        return(OVERFLOW);
+    }
+    ptListNodeTmp->eData  = *peInValue;
+    ptListNodeTmp->ptNext = NULL;
+
+    if (0 == iInPosition)
+    {
+        ptListNodeTmp->ptNext = L->ptHead;
+        L->ptHead = ptListNodeTmp;
+
+        L->iNum ++;
+        return(OK);
+    }
+
+    L->ptCur = L->ptHead;
+    while (NULL != L->ptCur)
+    {
+        iCount ++;
+        if (iCount == iInPosition)
+        {
+            ptListNodeTmp->ptNext = L->ptCur->ptNext;
+            L->ptCur->ptNext = ptListNodeTmp;
+
+            L->iNum ++;
+            return(OK);
+        }
+        L->ptCur = L->ptCur->ptNext;
+    }
+    return(OK);
+}
+
+/*****************************************************************************
+* 函数名称： DeleteList()
+* 功能描述： 删除元素在单链表指定位置
+* 访问的表： 
+* 修改的表： 
+* 输入参数： 指向单链表的指针
+* 输出参数： 无
+* 返 回 值： OK 表示更新成功，ERROR表示位置不合法
+* 其它说明： 
+* 修改日期    版本号     修改人	     修改内容
+* -----------------------------------------------
+* 11/03/01	   V1.0	      XXXX	      XXXX
+// ******************************************************************************/
+
+WORD DeleteList(T_LinkList *L, int iInPosition, Elemtype *peOutValue)
+{
+	int i;
+
+    // 检查删除位置是否合法
+    if (iInPosition < 1 || iInPosition > L->iNum)
+    {
+        return(ERROR);
+    }
+
+    // 删除结点为第一个结点
+    if (1 == iInPosition)
+    {
+        L->ptCur = L->ptHead;
+        L->ptHead = L->ptHead->ptNext;
+        L->iNum --;
+        
+        *peOutValue = L->ptCur->eData;
+        free(L->ptCur);
+    }
+	else// 删除结点为其他合法结点
+	{
+		T_ListNode *ptTemp;
+
+		L->ptCur = L->ptHead;
+		for (i = iInPosition-2; i > 0; i--)
+		{
+			L->ptCur = L->ptCur->ptNext;
+		}
+
+		ptTemp = L->ptCur->ptNext;
+		L->ptCur->ptNext = ptTemp->ptNext;
+		L->iNum --;
+
+		*peOutValue = ptTemp->eData;
+		free(ptTemp);
+	}
+
+    return(OK);      // 只要位置合法，一定能找到  
+}
+
+/*****************************************************************************
+ *                     函数实现--局部部分                                    *
+ *****************************************************************************/
